@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 
 env:
-  DOCKERHUB_USERNAME: 'xlen911'
+  DOCKERHUB_USERNAME: xlen911
 
 jobs:
   build-and-push:
@@ -30,3 +30,31 @@ jobs:
           tags: |
             ${{ env.DOCKERHUB_USERNAME }}/${{ matrix.service }}:latest
             ${{ env.DOCKERHUB_USERNAME }}/${{ matrix.service }}:${{ github.sha }}
+
+  # ✅ NUEVO JOB: Actualizar el repositorio de infraestructura
+  update-infra:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment:
+      name: dev   # ← AQUÍ SE CARGA EL ENTORNO DEV
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update values-dev.yaml in ecommerce-infra
+        env:
+          GH_PAT: ${{ secrets.INFRA_GIT_PAT }}
+        run: |
+          git clone https://x-access-token:${GH_PAT}@github.com/1103461933/ecommerce-infra.git
+          cd ecommerce-infra
+          
+          # Actualizar cada servicio con el SHA del commit
+          sed -i "s|tag: .*|tag: ${{ github.sha }}|g" helm/frontend/values-dev.yaml
+          sed -i "s|tag: .*|tag: ${{ github.sha }}|g" helm/api-gateway/values-dev.yaml
+          sed -i "s|tag: .*|tag: ${{ github.sha }}|g" helm/user-service/values-dev.yaml
+          sed -i "s|tag: .*|tag: ${{ github.sha }}|g" helm/product-service/values-dev.yaml
+          
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add helm/*/values-dev.yaml
+          git commit -m "Update dev images to ${{ github.sha }} [skip ci]"
+          git push
