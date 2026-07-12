@@ -1,0 +1,17 @@
+# Crear la carpeta public si no existe
+New-Item -ItemType Directory -Path .\frontend-react\public -Force
+
+# Crear index.html
+@"
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>E-commerce App</title>
+</head>
+<body>
+  <div id="root"></div>
+</body>
+</html>
+"@ | Out-File -FilePath .\frontend-react\public\index.html -Encoding utf8
