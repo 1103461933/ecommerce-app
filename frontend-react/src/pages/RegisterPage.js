@@ -19,60 +19,55 @@ function RegisterPage() {
       return;
     }
 
-    const userData = {
-      name: name.trim(),
-      email: email.trim(),
-      password: password
-    };
-
     try {
-      // Importante: /api/ para que pase por el proxy de Nginx
       const response = await fetch('/api/users/register', {
         method: 'POST',
         headers: { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify(userData)
+        body: JSON.stringify({ 
+          name: name.trim(), 
+          email: email.trim(), 
+          password: password 
+        })
       });
 
-      // Intentamos leer la respuesta como JSON
-      const data = await response.json().catch(() => null);
+      const data = await response.json().catch(() => ({}));
 
       if (response.ok) {
         setSuccess(true);
         setTimeout(() => navigate('/login'), 2000);
       } else {
-        setError(data?.message || 'Error en el servidor al registrar');
+        setError(data.message || 'Error al registrar usuario');
       }
     } catch (err) {
-      setError('Error de conexión con el backend');
+      setError('Error de conexión con el servidor');
     }
   };
 
   return (
     <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px' }}>
-      <h2 style={{ textAlign: 'center' }}>Registrarse</h2>
-      {error && <div style={{ color: 'white', background: '#dc3545', padding: '10px', borderRadius: '4px', marginBottom: '15px' }}>{error}</div>}
-      {success && <div style={{ color: 'white', background: '#28a745', padding: '10px', borderRadius: '4px', marginBottom: '15px' }}>¡Registro exitoso!</div>}
+      <h2>Registrarse</h2>
+      {error && <div style={{ color: 'red', marginBottom: '10px' }}>{error}</div>}
+      {success && <div style={{ color: 'green', marginBottom: '10px' }}>¡Registro exitoso!</div>}
       <form onSubmit={handleSubmit}>
         <div style={{ marginBottom: '10px' }}>
           <label>Nombre:</label>
-          <input type="text" value={name} onChange={(e) => setName(e.target.value)} required style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }} />
+          <input type="text" value={name} onChange={(e) => setName(e.target.value)} required style={{ width: '100%', padding: '8px' }} />
         </div>
         <div style={{ marginBottom: '10px' }}>
           <label>Email:</label>
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }} />
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required style={{ width: '100%', padding: '8px' }} />
         </div>
         <div style={{ marginBottom: '10px' }}>
           <label>Contraseña:</label>
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }} />
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required style={{ width: '100%', padding: '8px' }} />
         </div>
         <div style={{ marginBottom: '20px' }}>
-          <label>Confirmar:</label>
-          <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }} />
+          <label>Confirmar Contraseña:</label>
+          <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required style={{ width: '100%', padding: '8px' }} />
         </div>
-        <button type="submit" style={{ width: '100%', padding: '10px', background: '#28a745', color: 'white', border: 'none', cursor: 'pointer' }}>Registrarse</button>
+        <button type="submit" style={{ width: '100%', padding: '10px', background: '#28a745', color: 'white', border: 'none', borderRadius: '4px' }}>Registrarse</button>
       </form>
     </div>
   );
